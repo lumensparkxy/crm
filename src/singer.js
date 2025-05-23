@@ -1,51 +1,28 @@
-var express = require('express');
-var mongoClient = require('mongodb').MongoClient;
-var bodyParser = require('body-parser');
+const { body } = require('express-validator');
+const CrudController = require('./crudController');
 
-var coll = 'singer';
-var mydb = 'crm';
-var cursor;
+class SingersController extends CrudController {
+  constructor() {
+    super('singer', 'singers');
+  }
 
-var router = express.Router()
+  validateBody() {
+    return [
+      body('name').optional().isString().trim().isLength({ min: 1, max: 100 }),
+      body('genre').optional().isString().trim().isLength({ min: 1, max: 50 }),
+      body('albums').optional().isArray(),
+      body('birthYear').optional().isInt({ min: 1850, max: new Date().getFullYear() }),
+      body('country').optional().isString().trim().isLength({ min: 1, max: 50 }),
+      body().custom((value) => {
+        const allowedFields = ['name', 'genre', 'albums', 'birthYear', 'country'];
+        const extraFields = Object.keys(value).filter(key => !allowedFields.includes(key));
+        if (extraFields.length > 0) {
+          throw new Error(`Unexpected fields: ${extraFields.join(', ')}`);
+        }
+        return true;
+      })
+    ];
+  }
+}
 
-router.use(bodyParser.urlencoded({ extended: true }));
-router.use(bodyParser.json());
-
-var uri = 'mongodb://twitterx.organic-farmer.in:27017'
-
-
-// middleware that is specific to this router
-router.use(function timeLog(req, res, next) {
-    console.log('Time: ', Date.now())
-    next()
-});
-
-// Connect to the db
-mongoClient.connect(uri, { useNewUrlParser: true }, function (err, client) {
-    if (!err) {
-        cursor = client.db(mydb).collection(coll);
-    }
-});
-
-// define the home page route
-router.get('/', function (req, res) {
-    cursor.find(req.query).toArray(function (err, documents) {
-        res.json({ singers: documents })
-    });
-});
-
-router.post('/', function (req, res) {
-    cursor.insertOne(req.body, function (err, result) {
-        if (err) { res.json(err) }
-        else (res.json({ inserted_id: result.insertedId }));
-    });
-});
-
-
-router.delete('/:id', function (req, res) {
-    cursor.deleteOne(req.query, function (err, result) {
-        if (!err) { res.json({ result: result }) }
-    });
-});
-
-module.exports = router;
+module.exports = new SingersController().getRouter();
