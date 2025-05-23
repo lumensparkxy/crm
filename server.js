@@ -3,6 +3,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const database = require('./src/database');
+const logger = require('./src/logger');
 
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -70,7 +71,7 @@ async function startServer() {
 
     // Global error handler
     app.use((err, req, res, next) => {
-      console.error('Global error handler:', err);
+      logger.error('Global error handler:', err.message);
       res.status(500).json({
         success: false,
         message: 'Internal server error'
@@ -86,18 +87,18 @@ async function startServer() {
     });
 
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      logger.info(`Server is running on port ${PORT}`);
     });
 
     // Graceful shutdown
     process.on('SIGINT', async () => {
-      console.log('Shutting down gracefully...');
+      logger.info('Shutting down gracefully...');
       await database.close();
       process.exit(0);
     });
 
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.error('Failed to start server:', error.message);
     process.exit(1);
   }
 }

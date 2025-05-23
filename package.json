@@ -4,7 +4,9 @@
   "description": "crm rest services",
   "main": "server.js",
   "scripts": {
-    "test": "test"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",

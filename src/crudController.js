@@ -2,6 +2,7 @@ const express = require('express');
 const { body, query, param, validationResult } = require('express-validator');
 const { ObjectId } = require('mongodb');
 const database = require('./database');
+const logger = require('./logger');
 
 class CrudController {
   constructor(collectionName, resourceName) {
@@ -158,7 +159,7 @@ class CrudController {
   }
 
   handleError(res, error) {
-    console.error(`${this.resourceName} error:`, error);
+    logger.error(`${this.resourceName} error:`, error.message);
     
     if (error.name === 'MongoError' || error.name === 'BSONTypeError') {
       return res.status(400).json({

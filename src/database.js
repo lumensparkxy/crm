@@ -1,4 +1,5 @@
 const { MongoClient } = require('mongodb');
+const logger = require('./logger');
 
 class Database {
   constructor() {
@@ -16,10 +17,10 @@ class Database {
 
       await this.client.connect();
       this.db = this.client.db(process.env.DB_NAME || 'crm');
-      console.log('Connected to MongoDB successfully');
+      logger.info('Connected to MongoDB successfully');
       return this.db;
     } catch (error) {
-      console.error('MongoDB connection error:', error);
+      logger.error('MongoDB connection error:', error.message);
       throw error;
     }
   }
@@ -38,7 +39,7 @@ class Database {
   async close() {
     if (this.client) {
       await this.client.close();
-      console.log('MongoDB connection closed');
+      logger.info('MongoDB connection closed');
     }
   }
 }
