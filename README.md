@@ -101,18 +101,42 @@ All API responses follow this standard format:
     }
   },
   "message": "Error message if success=false",
-  "errors": [...]
+  "errors": [
+    {
+      "param": "fieldName",
+      "msg": "Error description",
+      "location": "body|query|param"
+    }
+  ]
+}
+```
+
+For successful create operations, the response includes the inserted ID and document:
+
+```json
+{
+  "success": true,
+  "data": {
+    "inserted_id": "60d21b4667d0d8992e610c85",
+    "resource_name": {...}
+  }
 }
 ```
 
 ## Input Validation
 
 All POST endpoints validate input data:
-- **Customers**: name, email, phone, address
-- **Albums**: title, artist, year, genre, tracks
-- **Directors**: name, nationality, birthYear, awards, movies  
-- **Singers**: name, genre, albums, birthYear, country
-- **Twitter**: hashtag, count, sentiment ('positive', 'negative', 'neutral'), timestamp (ISO 8601)
+- **Customers**: name (string, 1-100 chars), email (valid format), phone (string), address (string)
+- **Albums**: title (string, 1-200 chars), artist (string, 1-100 chars), year (integer, 1900-current), genre (string), tracks (array)
+- **Directors**: name (string, 1-100 chars), nationality (string, 1-50 chars), birthYear (integer, 1850-current), awards (array), movies (array)
+- **Singers**: name (string, 1-100 chars), genre (string, 1-50 chars), albums (array), birthYear (integer, 1850-current), country (string, 1-50 chars)
+- **Twitter**: hashtag (string, 1-100 chars), count (integer, min 0), sentiment ('positive', 'negative', 'neutral'), timestamp (ISO 8601)
+
+All endpoints use:
+- Validation with descriptive error messages
+- Field filtering to prevent unexpected data
+- Query parameter validation for pagination (limit, skip)
+- MongoDB ID validation for ID parameters
 
 ## Architecture
 
